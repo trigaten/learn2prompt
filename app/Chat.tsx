@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 
 interface ChatProps {
   starter: Sender;
-  color?: boolean;
+  color?: string;
 }
 
 const Chat = ({ starter, color }: ChatProps) => {
