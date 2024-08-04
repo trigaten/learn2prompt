@@ -1,22 +1,24 @@
-import Chat from './Chat';
+import Chat from './components/Chat';
+import Tutorial from './components/Tutorial';
+import { InputProvider } from './components/InputContext';
 
-export enum Sender {
-  USER = "USER",
-  BOT = "BOT"
+export enum Role {
+  USER = "user",
+  BOT = "assistant"
 }
 
 export interface Message {
-  sender: Sender;
-  text: string
+  role: Role;
+  content: string;
 }
 
 export default function Home() {
   return (
-    <div>
+    <InputProvider>
       <div className="flex items-stretch h-screen w-screen">
-          <Chat starter={Sender.BOT} />
-          <Chat starter={Sender.USER} color={'bg-gray-200'} />
+          <Tutorial />
+          <Chat />
       </div>
-    </div>
+    </InputProvider>
   );
 }
