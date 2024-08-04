@@ -3,7 +3,7 @@
 import { Role, Message } from '../page';
 import { useState, ReactElement } from 'react';
 import TextBox from './TextBox';
-import MessageView from './MessageView';
+import ChatMessageView from './ChatMessageView';
 
 const Chat = (): ReactElement => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -31,10 +31,10 @@ const Chat = (): ReactElement => {
   };
 
   return (
-    <div className={"flex-1 flex flex-col justify-between p-3 bg-gray-100"}>
-      <MessageView
+    <div className={"flex-1 flex flex-col justify-between py-12 px-20"}>
+      <ChatMessageView
         messages={messages}
-      ></MessageView>
+      ></ChatMessageView>
       
       <TextBox
         onSendMessage={handleSendMessage}

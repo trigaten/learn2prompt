@@ -19,10 +19,11 @@ const TextBox = ( {onSendMessage}: TextBoxProps ) => {
     };
 
     return (
-        <form className="w-full text-center" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <form className="w-full text-center px-8" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
             <input
-                className="border-2 border-black w-full h-10 text-3xl"
+                className="bg-gray-100 w-full h-10 text-lg px-6 font-medium rounded-2xl"
                 type="text"
+                placeholder='Type Here'
                 value={inputData}
                 onChange={(e) => handleChange(e.target.value)}
                 />

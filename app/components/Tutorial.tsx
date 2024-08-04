@@ -2,8 +2,10 @@
 
 import { Message, Role } from '../page';
 import { useState, useEffect, ReactElement } from 'react';
-import MessageView from './MessageView';
+import TutorialMessageView from './TutorialMessageView';
 import { useInputContext } from './InputContext';
+import Button from './Button';
+
 
 const Tutorial = (): ReactElement => {
   const tutorialSteps: Message[] = [
@@ -12,38 +14,32 @@ const Tutorial = (): ReactElement => {
     {role: Role.BOT, content: "Now read the response of the AI on the right:"}
   ];
 
-  const [ messages, setMessages ] = useState<Message[]>([tutorialSteps[0]]);
+  const [ messages, setMessages ] = useState<Message[]>(tutorialSteps);
   const { inputData, submitted, updateSubmitted } = useInputContext();
   const [ currentStep, setCurrentStep ] = useState<number>(0);
 
-  useEffect(() => {
-    const moveSteps = () => {
-      const newStep = currentStep + 1;
-      setCurrentStep(newStep);
-      setMessages([...messages, tutorialSteps[newStep]]);
+  const changeStep = (change: number) => {
+    let newStep = currentStep + change
+    if (newStep < 0) {
+      newStep = 0;
+    } else if (newStep >= messages.length) {
+      newStep = messages.length - 1;
     }
 
-    if (currentStep === 0 && inputData.toLowerCase() === "hello") {
-      moveSteps();
-    } else if (currentStep === 1 && submitted) {
-      updateSubmitted(false);
-      moveSteps();
-    };
-  }, [inputData, submitted, currentStep]);
+    setCurrentStep(newStep)
+  }
 
   return (
-    <div className={`flex-1 flex flex-col justify-between p-3`}>
-      <MessageView
+    <div className={`flex-1 flex flex-col justify-between p-12 bg-green rounded-r-3xl`}>
+      <TutorialMessageView
         messages={messages}
+        currentStep={currentStep}
       />
       
-      <form className="w-full text-center" onSubmit={(e) => {e.preventDefault()}} >
-        <input
-          className="border-2 border-black w-full h-10"
-          type="text"
-        />
-        <button type="submit" className="hidden">Send</button>
-      </form>
+      <div className={'flex-1 flex flex-row justify-between'}>
+        <Button highlighted={false} onPress={() => changeStep(-1)}> Previous </Button>
+        <Button highlighted={true} onPress={() => changeStep(1)}> Continue </Button>
+      </div>
     </div>
   );
 };

@@ -5,3 +5,15 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.bg-green {
+  background-color: #0ca17e;
+}
+
+.bg-light-green {
+  background-color: #45b99e;
+}
+
+.text-light-green {
+  color: #45b99e;
+}
