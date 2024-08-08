@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, ReactElement } from 'react';
-import { Message, Role } from '../page';
+import { Message } from '../page';
 
 interface TutorialMessageViewProps {
     messages: Message[];

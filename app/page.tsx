@@ -4,7 +4,8 @@ import { InputProvider } from './components/InputContext';
 
 export enum Role {
   USER = "user",
-  BOT = "assistant"
+  BOT = "assistant",
+  SYSTEM = "system"
 }
 
 export interface Message {
@@ -14,11 +15,11 @@ export interface Message {
 
 export default function Home() {
   return (
-    <InputProvider>
-      <div className="flex items-stretch h-screen w-screen">
+      <InputProvider>
+        <div className="flex items-stretch h-screen w-screen">
           <Tutorial />
           <Chat />
-      </div>
-    </InputProvider>
+        </div>
+      </InputProvider>
   );
 }

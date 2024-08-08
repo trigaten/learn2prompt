@@ -4,16 +4,17 @@ import { Role, Message } from '../page';
 import { useState, ReactElement } from 'react';
 import TextBox from './TextBox';
 import ChatMessageView from './ChatMessageView';
+import { useInputContext } from './InputContext';
 
 const Chat = (): ReactElement => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { chatMessages, updateChatMessages } = useInputContext(); 
 
   const handleSendMessage = async (input: string) => {
     if (input.trim()) {
       const userMessage: Message = { role: Role.USER, content: input };
 
-      const messagesToSubmit = [...messages, userMessage];
-      setMessages(messagesToSubmit)
+      const messagesToSubmit = [...chatMessages, userMessage];
+      updateChatMessages(userMessage)
 
       try {
         const response = await fetch('/api/openai', {
@@ -23,7 +24,7 @@ const Chat = (): ReactElement => {
         });
 
         const botMessage: Message = await response.json();
-        setMessages(prevMessages => [...prevMessages, botMessage]);
+        updateChatMessages(botMessage);
       } catch (error) {
         console.log("Error in API Call");
       }
@@ -31,9 +32,9 @@ const Chat = (): ReactElement => {
   };
 
   return (
-    <div className={"flex-1 flex flex-col justify-between py-12 px-20"}>
+    <div className={"flex-1 flex flex-col justify-between py-12 px-12"}>
       <ChatMessageView
-        messages={messages}
+        messages={chatMessages}
       ></ChatMessageView>
       
       <TextBox
