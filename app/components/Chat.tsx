@@ -1,7 +1,7 @@
 'use client';
 
-import { Role, Message } from '../page';
-import { useState, ReactElement } from 'react';
+import { Role, Message } from '../types';
+import { ReactElement } from 'react';
 import TextBox from './TextBox';
 import ChatMessageView from './ChatMessageView';
 import { useInputContext } from './InputContext';

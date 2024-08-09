@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, ReactElement } from 'react';
-import { Message, Role } from '../page';
+import { Message, Role } from '../types';
 
 interface ChatMessageViewProps {
     messages: Message[];

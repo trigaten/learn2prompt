@@ -9,6 +9,8 @@ type InputContextType = {
   updateSubmitted: (state: boolean) => void;
   chatMessages: Message[];
   updateChatMessages: (messages: Message) => void;
+  stringFound: boolean;
+  updateStringFound: (stringFound: boolean) => void;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -17,16 +19,23 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [inputData, setInputData] = useState<string>('');
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [stringFound, setStringFound] = useState<boolean>(false);
 
   const updateInputData = (data: string) => setInputData(data);
 
   const updateSubmitted = (submitted: boolean) => setSubmitted(submitted);
 
-  const updateChatMessages = (data: Message) => setChatMessages(prev => [...prev, data]);
+  const updateChatMessages = (newMessage: Message) => setChatMessages(prev => [...prev, newMessage]);
+
+  const updateStringFound = (stringFound: boolean) => setStringFound(stringFound);
 
   return (
-    <InputContext.Provider value={{ inputData, updateInputData, submitted, updateSubmitted, chatMessages, updateChatMessages }}>
-      {children}
+    <InputContext.Provider value={{ 
+      inputData, updateInputData, 
+      submitted, updateSubmitted, 
+      chatMessages, updateChatMessages, 
+      stringFound, updateStringFound }}>
+        {children}
     </InputContext.Provider>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
-import { Message, Role } from '../page';
-import { useState, useEffect, useRef, useCallback, ReactElement } from 'react';
+import { Message, Role } from '../types';
+import { useEffect, useState, useRef, useCallback, ReactElement } from 'react';
 import TutorialMessageView from './TutorialMessageView';
 import { useInputContext } from './InputContext';
 import Button from './Button';
@@ -20,7 +20,9 @@ const systemMessage: Message = {
     - submitted: whether the user has submitted
     - messages: a list of all messages. note that there will be a "role"
 
-    Send a message back to the user depending on what state they're in, moving along with each step until they are finished. When the user gets stuck, offer helpful advice, such as more detailed info on how to use a computer. Do not repeat yourself. Be aware that the user has no way to type messages to you at the moment. Make your messages concise. Do not use markdown formatting.
+    Send a message back to the user depending on what state they're in, moving along with each step until they are finished. Assume the AI will respond immediately.
+    
+    When the user gets stuck, offer helpful advice, such as more detailed info on how to use a computer. Do not repeat yourself. Be aware that the user has no way to type messages to you at the moment. Make your messages concise. Do not use markdown.
 
     To start, welcome them to the tutorial. Once all steps are completed, congratulate them on finishing.
   `
@@ -29,10 +31,9 @@ const systemMessage: Message = {
 const Tutorial = (): ReactElement => {
   const [tutorialMessages, setTutorialMessages] = useState<Message[]>([systemMessage]);
   const [botMessages, setBotMessages] = useState<Message[]>([]);
-  const { inputData, submitted, updateSubmitted, chatMessages } = useInputContext();
+  const { inputData, submitted, updateSubmitted, chatMessages, stringFound, updateStringFound } = useInputContext();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const initialFetchRef = useRef<boolean>(true);
+  const initialFetch = useRef<boolean>(true);
 
   const fetchTutorialMessage = useCallback(async () => {
     const stateMessage: Message = {
@@ -56,23 +57,25 @@ const Tutorial = (): ReactElement => {
     } catch (error) {
       console.log('Error in API Call');
     }
-  }, [inputData, submitted, chatMessages]);
+  }, [inputData, submitted, chatMessages, submitted]);
 
   useEffect(() => {
-    if (initialFetchRef.current) {
+    if (submitted) {
       fetchTutorialMessage();
-      setCurrentStep(0)
-      initialFetchRef.current = false;
+      updateSubmitted(false);
     }
-    
-    intervalRef.current = setInterval(fetchTutorialMessage, 7500);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [fetchTutorialMessage]);
+    if (stringFound) {
+      fetchTutorialMessage();
+      updateStringFound(false);
+    }
+
+    if (initialFetch.current) {
+      console.log("hello");
+      fetchTutorialMessage();
+      initialFetch.current = false;
+    }
+  }, [submitted, stringFound, initialFetch])
 
   const changeStep = (change: number) => {
     setCurrentStep((prevStep) => Math.max(0, Math.min(prevStep + change, botMessages.length)));

@@ -7,9 +7,11 @@ interface ButtonProps {
 }
 
 const Button = ( {highlighted, children, onPress}: ButtonProps ) => {
+    const colors = highlighted ? 'bg-white text-black' : 'bg-light-green text-white';
+
     return (
         <button 
-            className={`px-4 py-2 rounded-3xl text-lg font-medium ${highlighted ? 'bg-white text-black' : 'bg-light-green text-white'}`}
+            className={`px-4 py-2 rounded-3xl text-lg font-medium ${colors}`}
             onClick={onPress}
         >
             {children}

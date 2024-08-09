@@ -5,7 +5,8 @@ interface TextBoxProps {
 }
 
 const TextBox = ( {onSendMessage}: TextBoxProps ) => {
-    const { inputData, updateInputData, updateSubmitted } = useInputContext();
+    const { inputData, updateInputData, updateSubmitted, updateStringFound } = useInputContext();
+    const tutorialString = "hello";
 
     const handleSubmit = () => {
         onSendMessage(inputData);
@@ -15,7 +16,9 @@ const TextBox = ( {onSendMessage}: TextBoxProps ) => {
 
     const handleChange = (newInput: string) => {
         updateInputData(newInput);
-        updateSubmitted(false);
+        if (newInput.includes(tutorialString)) {
+            updateStringFound(true)
+        }
     };
 
     return (
