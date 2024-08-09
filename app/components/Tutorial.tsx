@@ -57,7 +57,7 @@ const Tutorial = (): ReactElement => {
     } catch (error) {
       console.log('Error in API Call');
     }
-  }, [inputData, submitted, chatMessages, submitted]);
+  }, [inputData, submitted, chatMessages, tutorialMessages, botMessages.length]);
 
   useEffect(() => {
     if (submitted) {
@@ -75,7 +75,7 @@ const Tutorial = (): ReactElement => {
       fetchTutorialMessage();
       initialFetch.current = false;
     }
-  }, [submitted, stringFound, initialFetch])
+  }, [submitted, stringFound, initialFetch, fetchTutorialMessage, updateStringFound, updateSubmitted])
 
   const changeStep = (change: number) => {
     setCurrentStep((prevStep) => Math.max(0, Math.min(prevStep + change, botMessages.length)));

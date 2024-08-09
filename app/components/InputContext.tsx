@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Message } from '../page';
+import { Message } from '../types';
 
 type InputContextType = {
   inputData: string;

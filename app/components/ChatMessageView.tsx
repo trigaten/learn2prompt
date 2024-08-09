@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, ReactElement } from 'react';
 import { Message, Role } from '../types';
+import Image from 'next/image';
 
 interface ChatMessageViewProps {
     messages: Message[];
@@ -26,9 +27,12 @@ const ChatMessageView = ( {messages}: ChatMessageViewProps ): ReactElement => {
                 ) : (
                     <div key={index} className="flex items-start mb-5">
                         <div className="w-10 h-10 flex-shrink-0 mr-3">
-                            <img 
+                            <Image 
                                 src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/6b483e19159771.562d5d6d738ba.png" 
-                                className="w-full h-full object-cover"
+                                alt="Your image description"
+                                layout="fill" 
+                                objectFit="cover"
+                                className="w-full h-full"
                             />
                         </div>
                         <h1 className="font-medium text-lg px-4 py-2 rounded-3xl flex-grow"> 
