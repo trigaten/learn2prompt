@@ -6,7 +6,7 @@ interface ButtonProps {
     onPress: () => void;
 }
 
-const Button = ( {highlighted, children, onPress}: ButtonProps ) => {
+const Button = ( {highlighted, children, onPress}: ButtonProps ): ReactNode => {
     const colors = highlighted ? 'bg-white text-black' : 'bg-light-green text-white';
 
     return (

@@ -13,32 +13,41 @@ const systemMessage: Message = {
 
     1. type the word hello in a box on the right
     2. press enter once that is done
-    3. get an AI response
+    3. wait for an AI response
+    4. received the AI response
 
     In the following messages, I will periodically send you the state of the website:
     - inputData: what the user has typed in their text box, prior to submitting
     - submitted: whether the user has submitted
+    - responseReceived: whether the AI has responded to the user's message
     - messages: a list of all messages. note that there will be a "role"
 
     Send a message back to the user depending on what state they're in, moving along with each step until they are finished. Assume the AI will respond immediately.
-    
+      
     When the user gets stuck, offer helpful advice, such as more detailed info on how to use a computer. Do not repeat yourself. Be aware that the user has no way to type messages to you at the moment. Make your messages concise. Do not use markdown.
 
-    To start, welcome them to the tutorial. Once all steps are completed, congratulate them on finishing.
-  `
+    To start, welcome them to the tutorial. Once steps 1-4 are completed, congratulate them on finishing. There are no further steps.
+    `
 };
 
+const initialBotMessage: Message =
+  {
+    role: Role.BOT,
+    content: 'Welcome to this PE tutorial, type the message hello into the box at the right to get started.'
+  };
+
 const Tutorial = (): ReactElement => {
-  const [tutorialMessages, setTutorialMessages] = useState<Message[]>([systemMessage]);
-  const [botMessages, setBotMessages] = useState<Message[]>([]);
-  const { inputData, submitted, updateSubmitted, chatMessages, stringFound, updateStringFound } = useInputContext();
+  const [tutorialMessages, setTutorialMessages] = useState<Message[]>([systemMessage, initialBotMessage]);
+  const [botMessages, setBotMessages] = useState<Message[]>([initialBotMessage]);
+  const { inputData, submitted, updateSubmitted, chatMessages, stringFound, 
+    updateStringFound, responseReceived, updateResponseReceived } = useInputContext();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const initialFetch = useRef<boolean>(true);
 
   const fetchTutorialMessage = useCallback(async () => {
     const stateMessage: Message = {
       role: Role.USER,
-      content: `inputData: ${inputData}, submitted: ${submitted}, chatMessages: ${JSON.stringify(chatMessages)}`
+      content: `inputData: ${inputData}, submitted: ${submitted}, responseReceived: ${responseReceived}, chatMessages: ${JSON.stringify(chatMessages)}`
     };
 
     console.log(stateMessage);
@@ -53,11 +62,10 @@ const Tutorial = (): ReactElement => {
       const botMessage: Message = await response.json();
       setTutorialMessages(prev => [...prev, stateMessage, botMessage]);
       setBotMessages(prev => [...prev, botMessage]);
-      setCurrentStep(botMessages.length) // length works bc state hasn't added to botMessages yet
     } catch (error) {
       console.log('Error in API Call');
     }
-  }, [inputData, submitted, chatMessages, tutorialMessages, botMessages.length]);
+  }, [inputData, submitted, responseReceived, chatMessages, tutorialMessages, botMessages.length]);
 
   useEffect(() => {
     if (submitted) {
@@ -70,15 +78,14 @@ const Tutorial = (): ReactElement => {
       updateStringFound(false);
     }
 
-    if (initialFetch.current) {
-      console.log("hello");
+    if (responseReceived) {
       fetchTutorialMessage();
-      initialFetch.current = false;
+      updateResponseReceived(false);
     }
-  }, [submitted, stringFound, initialFetch, fetchTutorialMessage, updateStringFound, updateSubmitted])
+  }, [submitted, stringFound, fetchTutorialMessage, updateStringFound, updateSubmitted, responseReceived, updateResponseReceived])
 
   const changeStep = (change: number) => {
-    setCurrentStep((prevStep) => Math.max(0, Math.min(prevStep + change, botMessages.length)));
+    setCurrentStep((prevStep) => Math.max(0, Math.min(prevStep + change, botMessages.length - 1)));
   };
 
   return (
@@ -86,7 +93,7 @@ const Tutorial = (): ReactElement => {
       <TutorialMessageView messages={botMessages} currentStep={currentStep} />
 
       <div className={'flex-1 flex flex-row justify-between'}>
-        <Button highlighted={currentStep !== 0} onPress={() => changeStep(-1)}> Previous </Button>
+        {/* <Button highlighted={currentStep !== 0} onPress={() => changeStep(-1)}> Previous </Button> */}
         <Button highlighted={currentStep !== botMessages.length - 1} onPress={() => changeStep(1)}> Continue </ Button>
       </div>
     </div>

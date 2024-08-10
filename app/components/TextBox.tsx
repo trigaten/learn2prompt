@@ -11,7 +11,6 @@ const TextBox = ( {onSendMessage}: TextBoxProps ) => {
     const handleSubmit = () => {
         onSendMessage(inputData);
         updateInputData("");
-        updateSubmitted(true);
     };
 
     const handleChange = (newInput: string) => {

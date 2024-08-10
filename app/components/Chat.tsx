@@ -7,7 +7,7 @@ import ChatMessageView from './ChatMessageView';
 import { useInputContext } from './InputContext';
 
 const Chat = (): ReactElement => {
-  const { chatMessages, updateChatMessages } = useInputContext(); 
+  const { chatMessages, updateChatMessages, updateSubmitted, updateResponseReceived } = useInputContext(); 
 
   const handleSendMessage = async (input: string) => {
     if (input.trim()) {
@@ -15,6 +15,7 @@ const Chat = (): ReactElement => {
 
       const messagesToSubmit = [...chatMessages, userMessage];
       updateChatMessages(userMessage)
+      updateSubmitted(true);
 
       try {
         const response = await fetch('/api/openai', {
@@ -25,6 +26,7 @@ const Chat = (): ReactElement => {
 
         const botMessage: Message = await response.json();
         updateChatMessages(botMessage);
+        updateResponseReceived(true);
       } catch (error) {
         console.log("Error in API Call");
       }

@@ -11,6 +11,8 @@ type InputContextType = {
   updateChatMessages: (messages: Message) => void;
   stringFound: boolean;
   updateStringFound: (stringFound: boolean) => void;
+  responseReceived: boolean;
+  updateResponseReceived: (responseReceived: boolean) => void;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [stringFound, setStringFound] = useState<boolean>(false);
+  const [responseReceived, setResponseReceived] = useState<boolean>(false);
 
   const updateInputData = (data: string) => setInputData(data);
 
@@ -29,12 +32,15 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updateStringFound = (stringFound: boolean) => setStringFound(stringFound);
 
+  const updateResponseReceived = (responseReceived: boolean) => setResponseReceived(responseReceived);
+
   return (
     <InputContext.Provider value={{ 
       inputData, updateInputData, 
       submitted, updateSubmitted, 
       chatMessages, updateChatMessages, 
-      stringFound, updateStringFound }}>
+      stringFound, updateStringFound,
+      responseReceived, updateResponseReceived}}>
         {children}
     </InputContext.Provider>
   );
