@@ -1,32 +1,18 @@
-'use client'
-
-import { useRef, useEffect, ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { Message } from '../types';
 
 interface TutorialMessageViewProps {
-    messages: Message[];
-    currentStep: number;
+    message: Message;
 }
 
-const TutorialMessageView = ( {messages, currentStep}: TutorialMessageViewProps ): ReactElement => {
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, [messages]);
-
-      return (
-        <div className="flex flex-col overflow-auto h-full mb-2 hide-scrollbar items-start">
-            {messages.map((message: Message, index: number) => (
-                <h1 key={index} className={`mb-5 text-2xl rounded-3xl px-4 py-2 font-sans font-medium ${currentStep === index ? 'text-white' : 'text-light-green'}`}> 
-                    {message.content} 
-                </h1>
-            ))}
-            <div ref={messagesEndRef} />   
-        </div>    
-    )
+const TutorialMessageView = ({ message }: TutorialMessageViewProps): ReactElement => {
+    return (
+        <div className="flex-1 flex items-center justify-center p-12 bg-green rounded-r-3xl">
+            <h1 className="text-center mb-5 text-2xl px-4 py-2 font-sans font-medium text-white">
+                {message.content}
+            </h1>
+        </div>
+    );
 }
 
 export default TutorialMessageView;
