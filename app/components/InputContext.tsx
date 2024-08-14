@@ -16,7 +16,7 @@ type InputContextType = {
   blockResponse: boolean;
   updateBlockResponse: (blockResponse: boolean) => void;
   handleSendMessage: (message: Message) => void;
-  handleReceiveMessage: () => void;
+  handleReceiveMessage: (messages?: Message[]) => void;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -46,12 +46,14 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     updateSubmitted(true);
   }
 
-  const handleReceiveMessage = async () => {
+  const handleReceiveMessage = async (messages?: Message[]) => {
+      const messagesToSubmit = messages ? messages : chatMessages;
+
       try {
         const response = await fetch('/api/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: chatMessages })
+          body: JSON.stringify({ messages: messagesToSubmit })
         });
 
         const botMessage: Message = await response.json();
