@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Message } from '../types';
+import { Message, Role } from '../types';
 
 type InputContextType = {
   inputData: string;
@@ -13,6 +13,10 @@ type InputContextType = {
   updateStringFound: (stringFound: boolean) => void;
   responseReceived: boolean;
   updateResponseReceived: (responseReceived: boolean) => void;
+  blockResponse: boolean;
+  updateBlockResponse: (blockResponse: boolean) => void;
+  handleSendMessage: (message: Message) => void;
+  handleReceiveMessage: () => void;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -23,6 +27,7 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [stringFound, setStringFound] = useState<boolean>(false);
   const [responseReceived, setResponseReceived] = useState<boolean>(false);
+  const [blockResponse, setBlockResponse] = useState<boolean>(false);
 
   const updateInputData = (data: string) => setInputData(data);
 
@@ -34,13 +39,39 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updateResponseReceived = (responseReceived: boolean) => setResponseReceived(responseReceived);
 
+  const updateBlockResponse = (blockResponse: boolean) => setBlockResponse(blockResponse);
+
+  const handleSendMessage = (message: Message) => {
+    updateChatMessages(message);
+    updateSubmitted(true);
+  }
+
+  const handleReceiveMessage = async () => {
+      try {
+        const response = await fetch('/api/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatMessages })
+        });
+
+        const botMessage: Message = await response.json();
+        updateChatMessages(botMessage);
+        updateResponseReceived(true);
+      } catch (error) {
+        console.log("Error in API Call");
+      }
+    }
+
   return (
     <InputContext.Provider value={{ 
       inputData, updateInputData, 
       submitted, updateSubmitted, 
       chatMessages, updateChatMessages, 
       stringFound, updateStringFound,
-      responseReceived, updateResponseReceived}}>
+      responseReceived, updateResponseReceived,
+      blockResponse, updateBlockResponse,
+      handleSendMessage, handleReceiveMessage}}
+    >
         {children}
     </InputContext.Provider>
   );

@@ -4,82 +4,113 @@ import { Message, Role } from '../types';
 import { useEffect, useState, useRef, useCallback, ReactElement } from 'react';
 import TutorialMessageView from './TutorialMessageView';
 import { useInputContext } from './InputContext';
+import Button from './Button';
 
-const systemMessage: Message = {
-  role: Role.SYSTEM,
-  content: `
-    You are a helpful assistant. You are going to be part of a Prompt Engineering Tutorial that teaches people how to use a computer to prompt AI. The user is chatting with AI and is to do the following steps, one at a time:
+enum condition {
+  FIND_STRING = "FIND_STRING",
+  PRESS_ENTER = "PRESS_ENTER",
+  CONTINUE_BUTTON = "CONTINUE_BUTTON"
+}
 
-    1. type the word hello in a box on the right
-    2. press enter once that is done
-    4. receive the AI response
+interface TutorialStage {
+  messages: Message[],
+  condition: condition 
+  string?: string
+}
 
-    In the following messages, I will periodically send you the state of the website:
-    - inputData: what the user has typed in their text box, prior to submitting
-    - submitted: whether the user has submitted a new message
-    - responseReceived: whether the AI has responded to the user's newest message
-    - messages: a list of all messages. note that there will be a "role" for either the user or the AI assistant as well as the message content
+const firstStage: TutorialStage = {
+  messages: [
+    {
+      role: Role.BOT,
+      content: 'Welcome to this interactive tutorial on prompt engineering.'
+    },
+    {
+      role: Role.BOT,
+      content: 'In this lesson, we will learn the very basics of prompting!'
+    },
+    {
+      role: Role.BOT,
+      content: 'To get started, just type the word “hello” in the box on the right.'
+    }
+  ],
+  condition: condition.FIND_STRING,
+  string: "hello"
+}
 
-    Send a message back to the user depending on what state they're in, moving along with each step until they are finished. Assume the AI will respond immediately.
-      
-    When the user gets stuck, offer helpful advice, such as more detailed info on how to use a computer. Do not repeat yourself. Be aware that the user has no way to type messages to you. Make your messages very concise. Do not use markdown.
+const secondStage: TutorialStage = {
+  messages: [
+    {
+      role: Role.BOT, 
+      content: 'Good job, now hit enter to send the message to an AI.'
+    }
+  ],
+  condition: condition.PRESS_ENTER
+}
 
-    To start, welcome them to the tutorial. Once steps 1-4 are completed, congratulate them on finishing. There are no further steps.
-    `
-};
+const thirdStage: TutorialStage = {
+  messages: [
+    {
+      role: Role.BOT,
+      content: 'Nice, you have just sent your first message to an AI!'
+    },
+    {
+      role: Role.BOT,
+      content: "After you are done reading this, click the “Continue” button below and I'll show you the AI's response."
+    }
+  ],
+  condition: condition.CONTINUE_BUTTON
+}
 
-const initialBotMessage: Message =
-  {
-    role: Role.BOT,
-    content: 'Welcome to this PE tutorial, type the message hello into the box at the right to get started.'
-  };
+const stages: TutorialStage[] = [firstStage, secondStage, thirdStage];
 
 const Tutorial = (): ReactElement => {
-  const [tutorialMessages, setTutorialMessages] = useState<Message[]>([systemMessage, initialBotMessage]);
-  const [botMessage, setBotMessage] = useState<Message>(initialBotMessage);
-  const { inputData, submitted, updateSubmitted, chatMessages, stringFound, 
-    updateStringFound, responseReceived, updateResponseReceived } = useInputContext();
-
-  const fetchTutorialMessage = useCallback(async () => {
-    const stateMessage: Message = {
-      role: Role.USER,
-      content: `inputData: ${inputData}, submitted: ${submitted}, responseReceived: ${responseReceived}, chatMessages: ${JSON.stringify(chatMessages)}`
-    };
-
-    try {
-      const response = await fetch('/api/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...tutorialMessages, stateMessage] })
-      });
-
-      const botMessage: Message = await response.json();
-      setTutorialMessages(prev => [...prev, stateMessage, botMessage]);
-      setBotMessage(botMessage);
-    } catch (error) {
-      console.log('Error in API Call');
-    }
-  }, [inputData, submitted, responseReceived, chatMessages, tutorialMessages]);
+  const [stage, setStage] = useState<number>(0);
+  const [botMessages, setBotMessages] = useState<Message[]>(firstStage.messages);
+  const [continueStage, setContinueStage] = useState<boolean>(false);
+  const { inputData, submitted, updateSubmitted, blockResponse, updateBlockResponse, 
+    handleReceiveMessage } = useInputContext();
 
   useEffect(() => {
-    if (submitted) {
-      fetchTutorialMessage();
-      updateSubmitted(false);
-    }
+    if (stage >= stages.length) return;
+    setBotMessages(stages[stage].messages);
+  }, [stage]);
 
-    if (stringFound) {
-      fetchTutorialMessage();
-      updateStringFound(false);
+  useEffect(() => {
+    const currentStage = stages[stage];
+    
+    if (!!currentStage?.condition) {
+      switch (currentStage.condition) {
+        case condition.FIND_STRING:
+          if (!!currentStage.string && inputData.includes(currentStage.string)) {
+            setStage(prev => prev + 1);
+          }
+        case condition.PRESS_ENTER:
+          if (submitted) {
+            updateSubmitted(!submitted);
+            setStage(prev => prev + 1);
+          }
+        case condition.CONTINUE_BUTTON:
+          updateBlockResponse(true);
+          if (continueStage) {
+            setContinueStage(false);
+            updateBlockResponse(false);
+            handleReceiveMessage();
+            setStage(prev => prev + 1);
+          }
+      }
     }
-
-    if (responseReceived) {
-      fetchTutorialMessage();
-      updateResponseReceived(false);
-    }
-  }, [submitted, stringFound, fetchTutorialMessage, updateStringFound, updateSubmitted, responseReceived, updateResponseReceived])
+  }, [stages, stage, inputData, submitted, continueStage]);
 
   return (
-    <TutorialMessageView message={botMessage}/>
+    <div className={`flex-1 flex flex-col justify-between p-12 bg-green rounded-r-3xl`}>
+      <TutorialMessageView messages={botMessages} />
+
+      {stages[stage]?.condition === condition.CONTINUE_BUTTON && (
+        <div className={'flex-1 flex flex-row justify-end'}>
+          <Button onPress={() => setContinueStage(true)}> Continue </ Button>
+        </div>
+      )}
+    </div>
   );
 };
 

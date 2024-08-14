@@ -1,15 +1,21 @@
+'use client'
+
 import { useInputContext } from './InputContext'; 
+import { Role, Message } from '../types';
 
-interface TextBoxProps {
-    onSendMessage: (input: string) => void;
-}
-
-const TextBox = ( {onSendMessage}: TextBoxProps ) => {
-    const { inputData, updateInputData, updateSubmitted, updateStringFound } = useInputContext();
+const TextBox = () => {
+    const { inputData, updateInputData, chatMessages, handleSendMessage, handleReceiveMessage, updateStringFound, blockResponse } = useInputContext();
     const tutorialString = "hello";
 
     const handleSubmit = () => {
-        onSendMessage(inputData);
+        const userMessage: Message = { role: Role.USER, content: inputData.trim() };
+        const messagesToSubmit = [...chatMessages, userMessage];
+        handleSendMessage(userMessage);
+
+        if (!blockResponse) {
+            handleReceiveMessage(messagesToSubmit);            
+        }
+
         updateInputData("");
     };
 
