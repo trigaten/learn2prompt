@@ -5,10 +5,11 @@ import { useEffect, useState, ReactElement } from 'react';
 import TutorialMessageView from './TutorialMessageView';
 import { useInputContext } from './InputContext';
 import Button from './Button';
+import ArrowWrapper from './ArrowWrapper';
 
 const Tutorial = (): ReactElement => {
   const [continueStage, setContinueStage] = useState<boolean>(false);
-  const { inputData, submitted, updateSubmitted, updateBlockResponse, 
+  const { inputData, submitted, updateSubmitted, updateBlockResponse,
     handleReceiveMessage, currentStage, updateCurrentStage } = useInputContext();
   const [botMessages, setBotMessages] = useState<Message[]>([]);
 
@@ -18,7 +19,7 @@ const Tutorial = (): ReactElement => {
     }
   }, [currentStage]);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (!!currentStage?.condition) {
       switch (currentStage.condition) {
         case Condition.FIND_STRING:
@@ -48,7 +49,11 @@ const Tutorial = (): ReactElement => {
 
       {currentStage?.condition === Condition.CONTINUE_BUTTON && (
         <div className={'flex-1 flex flex-row justify-end'}>
-          <Button onPress={() => setContinueStage(true)}> Continue </ Button>
+          <ArrowWrapper condition={Condition.CONTINUE_BUTTON == currentStage?.condition}>
+            <div className={'flex-1 flex flex-row justify-end'}>
+              <Button onPress={() => setContinueStage(true)}> Continue </ Button>
+            </div>
+          </ArrowWrapper>
         </div>
       )}
     </div>
