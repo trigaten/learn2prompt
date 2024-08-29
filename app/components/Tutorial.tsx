@@ -5,7 +5,7 @@ import { useEffect, useState, ReactElement } from 'react';
 import TutorialMessageView from './TutorialMessageView';
 import { useInputContext } from './InputContext';
 import Button from './Button';
-import ArrowWrapper from './ArrowWrapper';
+import ArrowWrapper from './ArrowWrapper'; /* this is for the animated arrow */
 
 const Tutorial = (): ReactElement => {
   const [continueStage, setContinueStage] = useState<boolean>(false);
