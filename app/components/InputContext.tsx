@@ -47,8 +47,22 @@ const thirdStage: TutorialStage = {
   ],
   condition: Condition.CONTINUE_BUTTON
 }
+const fourthStage: TutorialStage = {
+  index: 3,
+  messages: [
+    {
+      role: Role.BOT,
+      content: 'What would like to learn today?'
+    },
+    {
+      role: Role.BOT,
+      content: "You could ask things like 'What are the basics of prompt engineering?' or 'What are some beginner courses I should take?'."
+    }
+  ],
+  condition: Condition.PRESS_ENTER
+}
 
-const stages: TutorialStage[] = [firstStage, secondStage, thirdStage];
+const stages: TutorialStage[] = [firstStage, secondStage, thirdStage, fourthStage];
 
 type InputContextType = {
   inputData: string;
