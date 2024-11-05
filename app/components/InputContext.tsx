@@ -1,66 +1,5 @@
-'use client'
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Message, Role, TutorialStage, Condition } from '../types';
-
-const firstStage: TutorialStage = {
-  index: 0,
-  messages: [
-    {
-      role: Role.BOT,
-      content: 'Welcome to this interactive tutorial on prompt engineering.'
-    },
-    {
-      role: Role.BOT,
-      content: 'In this lesson, we will learn the very basics of prompting!'
-    },
-    {
-      role: Role.BOT,
-      content: 'To get started, just type the word “hello” in the box on the right.'
-    }
-  ],
-  condition: Condition.FIND_STRING,
-  string: "hello"
-}
-
-const secondStage: TutorialStage = {
-  index: 1,
-  messages: [
-    {
-      role: Role.BOT, 
-      content: 'Good job, now hit enter to send the message to an AI.'
-    }
-  ],
-  condition: Condition.PRESS_ENTER
-}
-
-const thirdStage: TutorialStage = {
-  index: 2,
-  messages: [
-    {
-      role: Role.BOT,
-      content: 'Nice, you have just sent your first message to an AI!'
-    },
-    {
-      role: Role.BOT,
-      content: "After you are done reading this, click the “Continue” button below and I'll show you the AI's response."
-    }
-  ],
-  condition: Condition.CONTINUE_BUTTON
-}
-const fourthStage: TutorialStage = {
-  index: 3,
-  messages: [
-    {
-      role: Role.BOT,
-      content: 'What would like to learn today?'
-    },
-    {
-      role: Role.BOT,
-      content: "You could ask things like 'What are the basics of prompt engineering?' or 'What are some beginner courses I should take?'."
-    }
-  ],
-  condition: Condition.PRESS_ENTER
-}
 
 const stages: TutorialStage[] = [firstStage, secondStage, thirdStage, fourthStage];
 
@@ -77,10 +16,13 @@ type InputContextType = {
   updateResponseReceived: (responseReceived: boolean) => void;
   blockResponse: boolean;
   updateBlockResponse: (blockResponse: boolean) => void;
+  typing: boolean;
+  resetTutorial: () => void;
   handleSendMessage: (message: Message) => void;
   handleReceiveMessage: (messages?: Message[]) => void;
   currentStage: TutorialStage;
   updateCurrentStage: () => void;
+  stageProgress: string;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -92,19 +34,15 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [stringFound, setStringFound] = useState<boolean>(false);
   const [responseReceived, setResponseReceived] = useState<boolean>(false);
   const [blockResponse, setBlockResponse] = useState<boolean>(false);
+  const [typing, setTyping] = useState<boolean>(false);
   const [stageIndex, setStageIndex] = useState<number>(0);
   const [currentStage, setCurrentStage] = useState<TutorialStage>(firstStage);
 
   const updateInputData = (data: string) => setInputData(data);
-
   const updateSubmitted = (submitted: boolean) => setSubmitted(submitted);
-
   const updateChatMessages = (newMessage: Message) => setChatMessages(prev => [...prev, newMessage]);
-
   const updateStringFound = (stringFound: boolean) => setStringFound(stringFound);
-
   const updateResponseReceived = (responseReceived: boolean) => setResponseReceived(responseReceived);
-
   const updateBlockResponse = (blockResponse: boolean) => setBlockResponse(blockResponse);
 
   const updateCurrentStage = () => {
@@ -113,12 +51,24 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setCurrentStage(stages[newIndex]);
   }
 
+  const resetTutorial = () => {
+    setStageIndex(0);
+    setCurrentStage(stages[0]);
+    setChatMessages([]);
+    setInputData('');
+    setStringFound(false);
+    setSubmitted(false);
+    setResponseReceived(false);
+    setBlockResponse(false);
+  };
+
   const handleSendMessage = (message: Message) => {
     updateChatMessages(message);
     updateSubmitted(true);
   }
 
   const handleReceiveMessage = async (messages?: Message[]) => {
+      setTyping(true); // Show typing indicator
       const messagesToSubmit = messages ? messages : chatMessages;
 
       try {
@@ -133,8 +83,13 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateResponseReceived(true);
       } catch (error) {
         console.log("Error in API Call");
+        updateChatMessages({ role: Role.BOT, content: "Sorry, there was an error. Please try again." });
+      } finally {
+        setTyping(false); // Hide typing indicator after receiving response
       }
     }
+
+  const stageProgress = `${stageIndex + 1} / ${stages.length}`;
 
   return (
     <InputContext.Provider value={{ 
@@ -144,8 +99,12 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       stringFound, updateStringFound,
       responseReceived, updateResponseReceived,
       blockResponse, updateBlockResponse,
+      typing,
+      resetTutorial,
       handleSendMessage, handleReceiveMessage,
-      currentStage, updateCurrentStage}}
+      currentStage, updateCurrentStage,
+      stageProgress
+    }}
     >
         {children}
     </InputContext.Provider>
@@ -155,7 +114,7 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 export const useInputContext = (): InputContextType => {
   const context = useContext(InputContext);
   if (!context) {
-    throw new Error('useInputContext must be used within a inputContext');
+    throw new Error('useInputContext must be used within a InputContext');
   }
   return context;
 };
