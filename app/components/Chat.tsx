@@ -5,6 +5,7 @@ import { ReactElement } from 'react';
 import TextBox from './TextBox';
 import ChatMessageView from './ChatMessageView';
 import { useInputContext } from './InputContext';
+import Button from './Button';
 
 const Chat = (): ReactElement => {
   const { chatMessages } = useInputContext(); 
@@ -15,7 +16,7 @@ const Chat = (): ReactElement => {
         messages={chatMessages}
       ></ChatMessageView>
       
-      <TextBox></TextBox>
+      <TextBox></TextBox> <Button onPress={() => alert('thank you!')}>Feedback</Button>
     </div>
   );
 };

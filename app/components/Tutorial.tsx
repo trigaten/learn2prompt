@@ -32,7 +32,7 @@ const Tutorial = (): ReactElement => {
             updateCurrentStage();
           }
         case Condition.CONTINUE_BUTTON:
-          updateBlockResponse(true);
+          //updateBlockResponse(true);
           if (continueStage) {
             setContinueStage(false);
             updateBlockResponse(false);

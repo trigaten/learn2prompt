@@ -91,7 +91,7 @@ export const InputProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [stringFound, setStringFound] = useState<boolean>(false);
   const [responseReceived, setResponseReceived] = useState<boolean>(false);
-  const [blockResponse, setBlockResponse] = useState<boolean>(false);
+  const [blockResponse, setBlockResponse] = useState<boolean>(true);
   const [stageIndex, setStageIndex] = useState<number>(0);
   const [currentStage, setCurrentStage] = useState<TutorialStage>(firstStage);
 
